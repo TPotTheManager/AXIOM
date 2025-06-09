@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>View Your Hours</title>
+</head>
+<body>
+  <h1>View Your Hours</h1>
+  
+  <label for="empID">Enter Employee ID:</label>
+  <input type="text" id="empID" />
+  <button onclick="filterData()">Search</button>
+
+  <table border="1" id="resultsTable">
+    <thead>
+      <tr>
+        <th>Entry</th>
+        <th>Name</th>
+        <th>Date</th>
+        <th>Clock in time</th>
+        <th>Clock out time</th>
+        <th>Lunch Duration</th>
+        <th>Duration</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script src="https://cdn.jsdelivr.net/npm/tabletop@1.6.0/tabletop.min.js"></script>
+  <script>
+    let allData = [];
+
+    // Initialize Tabletop
+    window.onload = function () {
+      Tabletop.init({
+        key: 'https://docs.google.com/spreadsheets/d/1nya0mn169Gal2Z2sU729Gr_AOaTLVjqbISTAXf8heRY/edit?gid=0#gid=0', // <- Replace this with your actual sheet URL
+        simpleSheet: true,
+        callback: function (data) {
+          allData = data;
+        }
+      });
+    };
+
+    function filterData() {
+      const empID = document.getElementById('empID').value.trim();
+      const tbody = document.querySelector('#resultsTable tbody');
+      tbody.innerHTML = "";
+
+      const filtered = allData.filter(row => row["Employee ID"] === empID);
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6">No records found.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row["Employee ID"]}</td>
+          <td>${row["Name"]}</td>
+          <td>${row["Date"]}</td>
+          <td>${row["Clock In"]}</td>
+          <td>${row["Clock Out"]}</td>
+          <td>${row["Lunch"]}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>
