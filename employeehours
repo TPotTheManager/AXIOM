@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Employee Hours</title>
+</head>
+<body>
+  <h1>View Your Hours</h1>
+  <iframe
+    src= "<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRxTHTGtAci4q7rsxIROTwiPFNcteYjZrGGq9dn6xUrp3RQLPz71dCIqp1bWJq_sXTFsHXl2DyF1MYX/pubhtml?widget=true&amp;headers=false">
+    width="100%" 
+    height="600">
+  </iframe>
   <style>
     body { font-family: sans-serif; text-align: center; }
     iframe { border: none; }
   </style>
-</head>
-<body>
-  <h1>Employee Hours Summary</h1>
-  <p>Enter your Employee ID to view your records:</p>
-  <!-- Placeholder for search bar / future filter -->
-  <iframe src="<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRxTHTGtAci4q7rsxIROTwiPFNcteYjZrGGq9dn6xUrp3RQLPz71dCIqp1bWJq_sXTFsHXl2DyF1MYX/pubhtml?widget=true&amp;headers=false"></iframe>" width="100%" height="600"></iframe>
 </body>
 </html>
