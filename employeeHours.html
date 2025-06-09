@@ -7,9 +7,20 @@
 <body>
   <h1>View Your Hours</h1>
   
-  <label for="empID">Enter Employee ID:</label>
-  <input type="text" id="empID" />
-  <button onclick="filterData()">Search</button>
+  <label for="empName">Select Your Name:</label>
+  <select id="empName">
+  <option value="">--Choose--</option>
+  <option value="Javier">Javier</option>
+  <option value="Gustavo">Gustavo</option>
+  <option value="Rodrigo">Rodrigo</option>
+  <option value="Sotero">Sotero</option>
+  <option value="Carlos">Carlos</option>
+  <option value="Taylor">Taylor</option>
+  <option value="Noah">Noah</option>
+  <!-- Add more names here -->
+</select>
+<button onclick="filterData()">Search</button>
+
 
   <table border="1" id="resultsTable">
     <thead>
