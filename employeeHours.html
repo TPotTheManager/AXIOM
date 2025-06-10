@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>View Your Hours</title>
+      <!-- ✅ Load Google Charts library -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <!-- ✅ Your custom script must come AFTER the loader -->
+    <script type="text/javascript" src="employeeHours.js" defer></script>
 </head>
 <body>
   <h1>View Your Hours</h1>
@@ -21,39 +26,6 @@
 </select>
 <button onclick="filterData()">Search</button>
 
-<script>
-  google.charts.load('current', { packages: ['table'] });
-  google.charts.setOnLoadCallback(loadData);
-
-  let originalData;
-
-  function loadData() {
-    const query = new google.visualization.Query(
-      'https://docs.google.com/spreadsheets/d/1nya0mn169Gal2Z2sU729Gr_AOaTLVjqbISTAXf8heRY/gviz/tq?sheet=Current_Week'
-    );
-    query.send(response => {
-      originalData = response.getDataTable();
-      drawTable(originalData);
-    });
-  }
-
-  function drawTable(data) {
-    const table = new google.visualization.Table(document.getElementById('table_div'));
-    table.draw(data, { showRowNumber: false, width: '100%', height: 'auto' });
-  }
-
-  function filterData() {
-    const name = document.getElementById('empName').value;
-    if (!name || !originalData) return;
-
-    const view = new google.visualization.DataView(originalData);
-    const nameColumnIndex = 1; // Assuming names are in column B (index 1)
-    view.setRows(originalData
-      .getFilteredRows([{ column: nameColumnIndex, value: name }]));
-
-    drawTable(view);
-  }
-</script>
 
 <div id="table_div"></div>
 
@@ -71,48 +43,6 @@
     </thead>
     <tbody></tbody>
   </table>
-
-  <script src="https://cdn.jsdelivr.net/npm/tabletop@1.6.0/tabletop.min.js"></script> 
-  <script>
-    let allData = [];
-
-    // Initialize Tabletop
-    window.onload = function () {
-      Tabletop.init({
-        key: 'https://docs.google.com/spreadsheets/d/1nya0mn169Gal2Z2sU729Gr_AOaTLVjqbISTAXf8heRY/edit?gid=0#gid=0', // <- Replace this with your actual sheet URL
-        simpleSheet: true,
-        callback: function (data) {
-          allData = data;
-        }
-      });
-    };
-
-    function filterData() {
-      const empID = document.getElementById('empID').value.trim();
-      const tbody = document.querySelector('#resultsTable tbody');
-      tbody.innerHTML = "";
-
-      const filtered = allData.filter(row => row["Employee ID"] === empID);
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6">No records found.</td></tr>`;
-        return;
-      }
-
-      filtered.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${row["Employee ID"]}</td>
-          <td>${row["Name"]}</td>
-          <td>${row["Date"]}</td>
-          <td>${row["Clock In"]}</td>
-          <td>${row["Clock Out"]}</td>
-          <td>${row["Lunch"]}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-  </script>
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  
 </body>
 </html>
