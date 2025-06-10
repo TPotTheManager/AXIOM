@@ -1,48 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>View Your Hours</title>
-      <!-- ✅ Load Google Charts library -->
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
-    <!-- ✅ Your custom script must come AFTER the loader -->
-    <script type="text/javascript" src="employeeHours.js" defer></script>
+  <!-- Load Google Charts -->
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="employeeHours.js" defer></script>
 </head>
 <body>
   <h1>View Your Hours</h1>
-  
+
   <label for="empName">Select Your Name:</label>
   <select id="empName">
-  <option value="">--Choose--</option>
-  <option value="Javier">Javier</option>
-  <option value="Gustavo">Gustavo</option>
-  <option value="Rodrigo">Rodrigo</option>
-  <option value="Sotero">Sotero</option>
-  <option value="Carlos">Carlos</option>
-  <option value="Taylor">Taylor</option>
-  <option value="Noah">Noah</option>
-  <!-- Add more names here -->
-</select>
-<button onclick="filterData()">Search</button>
+    <option value="">--Choose--</option>
+    <option value="Javier">Javier</option>
+    <option value="Gustavo">Gustavo</option>
+    <option value="Rodrigo">Rodrigo</option>
+    <option value="Sotero">Sotero</option>
+    <option value="Carlos">Carlos</option>
+    <option value="Taylor">Taylor</option>
+    <option value="Noah">Noah</option>
+  </select>
+  <button onclick="filterData()">Search</button>
 
-
-<div id="table_div"></div>
-
-  <table border="1" id="resultsTable">
-    <thead>
-      <tr>
-        <th>Entry</th>
-        <th>Name</th>
-        <th>Date</th>
-        <th>Clock in time</th>
-        <th>Clock out time</th>
-        <th>Lunch Duration</th>
-        <th>Duration</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  
+  <div id="table_div"></div>
 </body>
 </html>
