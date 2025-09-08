@@ -1,1 +1,19 @@
-
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>DASHBOARD</title>
+</head>
+<body>
+  <h1>Project Snapshots</h1>
+  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTI_k5LWRan9_-4spXmqboNLx_lbGhAgWMDn2DPvcKLAl1qd8YE_8PBcAJTMntu4Zsa0-fXIjjR8gBB/pubhtml?widget=true&amp;headers=false">
+  </iframe>
+  <h1>Invoice Tracker</h1>
+  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSASNoc3pj-UF6etp5tNjaF2yYZz_g9QYKsiqo6PwIROFVxN4EahKt6fnL789PQ8hJdTCquOZnEMzMX/pubhtml?widget=true&amp;headers=false">
+  </iframe>
+  <style>
+    body { font-family: sans-serif; text-align: center; }
+    iframe { border: none; }
+  </style>
+</body>
+</html>
