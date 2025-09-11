@@ -1,25 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>DASHBOARD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="DASHBOARD_styles.css">
 </head>
 <body>
-  <h1>Project Snapshots</h1>
-  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTI_k5LWRan9_-4spXmqboNLx_lbGhAgWMDn2DPvcKLAl1qd8YE_8PBcAJTMntu4Zsa0-fXIjjR8gBB/pubhtml?widget=true&amp;headers=false"
-    width="100%" 
-    height="300">
-  </iframe>
-  <h1>Invoice Tracker</h1>
-  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSASNoc3pj-UF6etp5tNjaF2yYZz_g9QYKsiqo6PwIROFVxN4EahKt6fnL789PQ8hJdTCquOZnEMzMX/pubhtml?widget=true&amp;headers=false"
-    width="100%" 
-    height="300">
-  </iframe>
-  <iframe src="https://calendar.google.com/calendar/embed?src=taylor%40axiomlandscape.com&ctz=America%2FPhoenix" style="border: 0" width="800" height="600" frameborder="0" scrolling="no">
-  </iframe>
-  <style>
-    body { font-family: sans-serif; text-align: center; }
-    iframe { border: none; }
-  </style>
+  <div class="container">
+    <div class="left-column">
+      <div class="embed">
+        <!-- Project Snapshots -->
+        <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTI_k5LWRan9_-4spXmqboNLx_lbGhAgWMDn2DPvcKLAl1qd8YE_8PBcAJTMntu4Zsa0-fXIjjR8gBB/pubhtml?widget=true&amp;headers=false"
+                width="100%" height="400" frameborder="0"></iframe>
+      </div>
+      <div class="embed">
+        <!-- Invoice Tracker -->
+        <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSASNoc3pj-UF6etp5tNjaF2yYZz_g9QYKsiqo6PwIROFVxN4EahKt6fnL789PQ8hJdTCquOZnEMzMX/pubhtml?widget=true&amp;headers=false"
+                width="100%" height="400" frameborder="0"></iframe>
+      </div>
+    </div>
+    <div class="right-column">
+      <!-- Google Calendar embed -->
+      <iframe src="https://calendar.google.com/calendar/embed?src=taylor%40axiomlandscape.com&ctz=America%2FPhoenix"
+              width="100%" height="850" frameborder="0" scrolling="no"></iframe>
+    </div>
+  </div>
 </body>
 </html>
