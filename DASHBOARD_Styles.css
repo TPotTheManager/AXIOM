@@ -1,0 +1,41 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Left column for the 2 Sheets */
+.left-column {
+  flex: 1;              /* Take up equal share of space */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;            /* Space between the two embeds */
+}
+
+/* Right column for the Calendar */
+.right-column {
+  flex: 1;
+}
+
+/* Makes iframes scale nicely */
+.embed iframe,
+.right-column iframe {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* Mobile-friendly stacking */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+}
