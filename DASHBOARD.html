@@ -14,6 +14,21 @@
         <iframe src="https://docs.google.com/spreadsheets/d/1N2Fg4Uwky_TaXb-XwHFOoPiQgf20hJDWQqB2L_dIsko/edit?usp=sharing&widget=false&headers=false"
                 width="100%" height="400" frameborder="0"></iframe>
       </div>
+      <style>
+        .iframe-wrapper {
+          width: 100%;
+          height: 600px;
+          overflow: hidden;
+          position: relative;
+        }
+        #sheetFrame {
+          position: absolute;
+          top: -10px;   /* hides the toolbar */
+          left: 0;
+          width: 100%;
+          height: 900px; /* extra height so content stays visible */
+        }
+      </style>
       <div class="embed">
         <!-- Invoice Tracker -->
         <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSASNoc3pj-UF6etp5tNjaF2yYZz_g9QYKsiqo6PwIROFVxN4EahKt6fnL789PQ8hJdTCquOZnEMzMX/pubhtml?widget=true&amp;headers=false"
