@@ -1,3 +1,5 @@
+console.log("calendar.js loaded");
+
 // ==== CONFIG ====
 const CLIENT_ID = "22963410601-aek29etcolf3nkkpifs2mncehj60ta7e.apps.googleusercontent.com";
 const API_KEY = "AIzaSyDeyN9bNwa-_CCcHPcRksbg_i0Q4yBvjac";
@@ -10,6 +12,7 @@ function startApp() {
 }
 
 function initClient() {
+  console.log("Google API client initialized");
   gapi.client
     .init({
       apiKey: API_KEY,
@@ -21,6 +24,8 @@ function initClient() {
       const authInstance = gapi.auth2.getAuthInstance();
       const authorizeButton = document.getElementById("authorize_button");
       const signoutButton = document.getElementById("signout_button");
+      document.getElementById("authorize_button").onclick = handleAuthClick;
+
 
       authorizeButton.onclick = () => authInstance.signIn();
       signoutButton.onclick = () => authInstance.signOut();
@@ -28,6 +33,11 @@ function initClient() {
       authInstance.isSignedIn.listen(updateSigninStatus);
       updateSigninStatus(authInstance.isSignedIn.get());
     });
+}
+
+function handleAuthClick() {
+  const authInstance = gapi.auth2.getAuthInstance();
+  authInstance.signIn();
 }
 
 function updateSigninStatus(isSignedIn) {
