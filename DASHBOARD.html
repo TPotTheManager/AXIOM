@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
   <link rel="stylesheet" href="DASHBOARD_Styles.css">
+  <!-- FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<!-- Google API -->
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://apis.google.com/js/platform.js"></script>
+
+<!-- Your Calendar Logic -->
+<script defer src="calendar.js"></script>
 </head>
 <body>
   <div class="container">
@@ -36,11 +46,17 @@
       </div>
     </div>
     <div class="right-column">
-      <!-- Google Calendar embed -->
-      src="<iframe src="https://calendar.google.com/calendar/embed?src=c_8bb7f80d46484a64298e0c67b6ca7f1580bc73242162874c2b938b882597d270%40group.calendar.google.com&ctz=America%2FPhoenix"
-      style="border:0" width="100%" height="600" frameborder="0" scrolling="no">
-      </iframe>
-
+     <!-- 🗓️ Axiom Team Calendar -->
+      <section id="calendar-section" style="margin: 30px 0; text-align:center;">
+        <h2>Axiom Team Calendar</h2>
+      
+        <!-- Auth buttons -->
+        <button id="authorize_button">Authorize</button>
+        <button id="signout_button" style="display:none;">Sign Out</button>
+      
+        <!-- The calendar container -->
+        <div id="calendar" style="max-width:900px; margin:40px auto;"></div>
+      </section>
     </div>
   </div>
 </body>
