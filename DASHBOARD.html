@@ -4,58 +4,502 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
-  <link rel="stylesheet" href="DASHBOARD_Styles.css">
+  
   <!-- FullCalendar -->
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-
-<!-- Google API -->
-<script src="https://apis.google.com/js/api.js"></script>
-<script src="https://apis.google.com/js/platform.js"></script>
-
-<!-- Your Calendar Logic -->
-<script src="calendar.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+  
+  <!-- Google API -->
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .calendar-container {
+      flex: 1;
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .embed {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    iframe {
+      display: block;
+      border: none;
+    }
+    #calendar {
+      height: 750px;
+    }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 30px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .modal-content h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #555;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 25px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .btn-primary {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: #45a049;
+    }
+    .btn-secondary {
+      background-color: #999;
+      color: white;
+    }
+    .btn-secondary:hover {
+      background-color: #777;
+    }
+    .btn-danger {
+      background-color: #f44336;
+      color: white;
+    }
+    .btn-danger:hover {
+      background-color: #da190b;
+    }
+    .login-container {
+      text-align: center;
+      padding: 20px;
+      background: #f0f0f0;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    #signInBtn {
+      padding: 12px 24px;
+      background: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    #signInBtn:hover {
+      background: #357ae8;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <div class="left-column">
+      <!-- Project Snapshots -->
       <div class="embed">
-        <!-- Project Snapshots -->
-        <iframe src="https://docs.google.com/spreadsheets/d/1N2Fg4Uwky_TaXb-XwHFOoPiQgf20hJDWQqB2L_dIsko/edit?usp=sharing&widget=false&headers=false"
-                width="100%" height="400" frameborder="0"></iframe>
+        <iframe 
+          src="https://docs.google.com/spreadsheets/d/1N2Fg4Uwky_TaXb-XwHFOoPiQgf20hJDWQqB2L_dIsko/edit?usp=sharing&widget=false&headers=false"
+          width="100%" 
+          height="400">
+        </iframe>
       </div>
-      <style>
-        .iframe-wrapper {
-          width: 100%;
-          height: 600px;
-          overflow: hidden;
-          position: relative;
-        }
-        #sheetFrame {
-          position: absolute;
-          top: -10px;   /* hides the toolbar */
-          left: 0;
-          width: 100%;
-          height: 900px; /* extra height so content stays visible */
-        }
-      </style>
+      
+      <!-- Invoice Tracker -->
       <div class="embed">
-        <!-- Invoice Tracker -->
-        <iframe src="https://docs.google.com/spreadsheets/d/1SfT40Ezl2C1YZHyFHp277YtQ3D22zomKO-qA1l9IFh0/edit?usp=sharing&widget=false&headers=false"
-                width="100%" height="400" frameborder="0"></iframe>
+        <iframe 
+          src="https://docs.google.com/spreadsheets/d/1SfT40Ezl2C1YZHyFHp277YtQ3D22zomKO-qA1l9IFh0/edit?usp=sharing&widget=false&headers=false"
+          width="100%" 
+          height="400">
+        </iframe>
       </div>
     </div>
+    
+    <!-- Calendar -->
     <div class="calendar-container">
-      <iframe 
-        src="https://script.google.com/a/macros/axiomlandscape.com/s/AKfycbwDirlidsVen44Fev5zKDvrrlFFAkMIMSsNfIFxRQYulrxnG_yRvuL_4CEcKBgOq5h8NA/exec"
-        width="100%" 
-        height="700" 
-        frameborder="0"
-        style="border:0;">
-      </iframe>
-    </div>
-      </section>
+      <div class="login-container" id="loginContainer">
+        <p>Please sign in to access your calendar:</p>
+        <button id="signInBtn" onclick="handleAuthClick()">Sign in with Google</button>
+      </div>
+      <div id="calendar" style="display:none;"></div>
     </div>
   </div>
+
+  <!-- Add/Edit Event Modal -->
+  <div id="eventModal" class="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Add Event</h2>
+      <form id="eventForm">
+        <div class="form-group">
+          <label for="eventTitle">Event Title:</label>
+          <input type="text" id="eventTitle" required>
+        </div>
+        <div class="form-group">
+          <label for="eventStart">Start Date & Time:</label>
+          <input type="datetime-local" id="eventStart" required>
+        </div>
+        <div class="form-group">
+          <label for="eventEnd">End Date & Time:</label>
+          <input type="datetime-local" id="eventEnd" required>
+        </div>
+        <div class="button-group">
+          <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+          <button type="button" class="btn-danger" id="deleteBtn" style="display:none;" onclick="deleteEvent()">Delete</button>
+          <button type="submit" class="btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Google API Configuration
+    const CLIENT_ID = '22963410601-aek29etcolf3nkkpifs2mncehj60ta7e.apps.googleusercontent.com';
+    const API_KEY = 'AIzaSyDeyN9bNwa-_CCcHPcRksbg_i0Q4yBvjac';
+    const CALENDAR_ID = 'c_8bb7f80d46484a64298e0c67b6ca7f1580bc73242162874c2b938b882597d270@group.calendar.google.com';
+    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
+    const SCOPES = 'https://www.googleapis.com/auth/calendar';
+
+    let tokenClient;
+    let gapiInited = false;
+    let gisInited = false;
+    
+    let calendar;
+    let currentEvent = null;
+
+    // Initialize Google API
+    function gapiLoaded() {
+      gapi.load('client', initializeGapiClient);
+    }
+
+    async function initializeGapiClient() {
+      await gapi.client.init({
+        apiKey: API_KEY,
+        discoveryDocs: [DISCOVERY_DOC],
+      });
+      gapiInited = true;
+      maybeEnableButtons();
+    }
+
+    function gisLoaded() {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: '', // defined later
+      });
+      gisInited = true;
+      maybeEnableButtons();
+    }
+
+    function maybeEnableButtons() {
+      if (gapiInited && gisInited) {
+        document.getElementById('signInBtn').disabled = false;
+      }
+    }
+
+    function handleAuthClick() {
+      tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+          throw (resp);
+        }
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('calendar').style.display = 'block';
+        initCalendar();
+      };
+
+      if (gapi.client.getToken() === null) {
+        tokenClient.requestAccessToken({prompt: 'consent'});
+      } else {
+        tokenClient.requestAccessToken({prompt: ''});
+      }
+    }
+
+    // Load Google API on page load
+    window.onload = function() {
+      gapiLoaded();
+      gisLoaded();
+    };
+
+    function initCalendar() {
+      const calendarEl = document.getElementById('calendar');
+
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        selectable: true,
+        editable: true,
+        events: [],
+        
+        // When user clicks on calendar to add new event
+        select: function(info) {
+          openModal('add', {
+            start: info.start,
+            end: info.end
+          });
+          calendar.unselect();
+        },
+        
+        // When user clicks on existing event
+        eventClick: function(info) {
+          openModal('edit', info.event);
+        },
+        
+        // When user drags/resizes event
+        eventDrop: function(info) {
+          updateEventInCalendar(info.event);
+        },
+        eventResize: function(info) {
+          updateEventInCalendar(info.event);
+        }
+      });
+
+      calendar.render();
+      loadEvents();
+    }
+
+    function openModal(mode, data) {
+      const modal = document.getElementById('eventModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const deleteBtn = document.getElementById('deleteBtn');
+      
+      if (mode === 'add') {
+        modalTitle.textContent = 'Add Event';
+        document.getElementById('eventTitle').value = '';
+        document.getElementById('eventStart').value = formatDateForInput(data.start);
+        document.getElementById('eventEnd').value = formatDateForInput(data.end);
+        deleteBtn.style.display = 'none';
+        currentEvent = null;
+      } else {
+        modalTitle.textContent = 'Edit Event';
+        document.getElementById('eventTitle').value = data.title;
+        document.getElementById('eventStart').value = formatDateForInput(data.start);
+        document.getElementById('eventEnd').value = formatDateForInput(data.end);
+        deleteBtn.style.display = 'block';
+        currentEvent = data;
+      }
+      
+      modal.style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('eventModal').style.display = 'none';
+      currentEvent = null;
+    }
+
+    function formatDateForInput(date) {
+      const d = new Date(date);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+    document.getElementById('eventForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const title = document.getElementById('eventTitle').value;
+      const start = document.getElementById('eventStart').value;
+      const end = document.getElementById('eventEnd').value;
+      
+      if (currentEvent) {
+        // Update existing event
+        currentEvent.setProp('title', title);
+        currentEvent.setStart(start);
+        currentEvent.setEnd(end);
+        updateEventInCalendar(currentEvent);
+      } else {
+        // Add new event
+        const newEvent = calendar.addEvent({
+          title: title,
+          start: start,
+          end: end
+        });
+        addEventToCalendar(newEvent);
+      }
+      
+      closeModal();
+    });
+
+    function deleteEvent() {
+      if (currentEvent && confirm('Are you sure you want to delete this event?')) {
+        deleteEventFromCalendar(currentEvent);
+        currentEvent.remove();
+        closeModal();
+      }
+    }
+
+    // Note: These functions use placeholder logic since we can't actually connect to Google Calendar
+    // from a standalone HTML file. You'll need to implement the Google Calendar API integration.
+    
+    async function loadEvents() {
+      try {
+        const response = await gapi.client.calendar.events.list({
+          'calendarId': CALENDAR_ID,
+          'timeMin': (new Date()).toISOString(),
+          'showDeleted': false,
+          'singleEvents': true,
+          'maxResults': 250,
+          'orderBy': 'startTime'
+        });
+
+        const events = response.result.items;
+        if (events && events.length > 0) {
+          events.forEach(event => {
+            calendar.addEvent({
+              id: event.id,
+              title: event.summary,
+              start: event.start.dateTime || event.start.date,
+              end: event.end.dateTime || event.end.date
+            });
+          });
+        }
+      } catch (err) {
+        console.error('Error loading events:', err);
+        alert('Error loading events from Google Calendar');
+      }
+    }
+
+    async function addEventToCalendar(event) {
+      try {
+        const googleEvent = {
+          'summary': event.title,
+          'start': {
+            'dateTime': event.start.toISOString(),
+            'timeZone': 'America/Phoenix'
+          },
+          'end': {
+            'dateTime': event.end.toISOString(),
+            'timeZone': 'America/Phoenix'
+          }
+        };
+
+        const response = await gapi.client.calendar.events.insert({
+          'calendarId': CALENDAR_ID,
+          'resource': googleEvent
+        });
+
+        // Update the event ID so we can modify/delete it later
+        event.setProp('id', response.result.id);
+        console.log('Event created:', response.result.htmlLink);
+      } catch (err) {
+        console.error('Error adding event:', err);
+        alert('Error adding event to Google Calendar');
+      }
+    }
+
+    async function updateEventInCalendar(event) {
+      try {
+        const googleEvent = {
+          'summary': event.title,
+          'start': {
+            'dateTime': event.start.toISOString(),
+            'timeZone': 'America/Phoenix'
+          },
+          'end': {
+            'dateTime': event.end.toISOString(),
+            'timeZone': 'America/Phoenix'
+          }
+        };
+
+        await gapi.client.calendar.events.update({
+          'calendarId': CALENDAR_ID,
+          'eventId': event.id,
+          'resource': googleEvent
+        });
+
+        console.log('Event updated');
+      } catch (err) {
+        console.error('Error updating event:', err);
+        alert('Error updating event in Google Calendar');
+      }
+    }
+
+    async function deleteEventFromCalendar(event) {
+      try {
+        await gapi.client.calendar.events.delete({
+          'calendarId': CALENDAR_ID,
+          'eventId': event.id
+        });
+
+        console.log('Event deleted');
+      } catch (err) {
+        console.error('Error deleting event:', err);
+        alert('Error deleting event from Google Calendar');
+      }
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+      const modal = document.getElementById('eventModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    }
+  </script>
 </body>
 </html>
