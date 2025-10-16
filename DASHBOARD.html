@@ -202,6 +202,22 @@
           <label for="eventEnd">End Date & Time:</label>
           <input type="datetime-local" id="eventEnd" required>
         </div>
+        <div class="form-group">
+          <label for="eventColor">Color:</label>
+          <select id="eventColor">
+            <option value="1" style="background-color: #a4bdfc;">Lavender</option>
+            <option value="2" style="background-color: #7ae7bf;">Sage</option>
+            <option value="3" style="background-color: #dbadff;">Grape</option>
+            <option value="4" style="background-color: #ff887c;">Flamingo</option>
+            <option value="5" style="background-color: #fbd75b;">Banana</option>
+            <option value="6" style="background-color: #ffb878;">Tangerine</option>
+            <option value="7" style="background-color: #46d6db;">Peacock</option>
+            <option value="8" style="background-color: #e1e1e1;">Graphite</option>
+            <option value="9" style="background-color: #5484ed;" selected>Blueberry</option>
+            <option value="10" style="background-color: #51b749;">Basil</option>
+            <option value="11" style="background-color: #dc2127;">Tomato</option>
+          </select>
+        </div>
         <div class="button-group">
           <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
           <button type="button" class="btn-danger" id="deleteBtn" style="display:none;" onclick="deleteEvent()">Delete</button>
