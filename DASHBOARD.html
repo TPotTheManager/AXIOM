@@ -293,6 +293,8 @@
     window.onload = function() {
       gapiLoaded();
       gisLoaded();
+      // Check for existing auth after API loads
+      setTimeout(checkExistingAuth, 1000);
     };
 
     function initCalendar() {
@@ -329,6 +331,11 @@
         },
         eventResize: function(info) {
           updateEventInCalendar(info.event);
+        }
+        // Display event with custom styling
+        eventDidMount: function(info) {
+          info.el.style.backgroundColor = info.event.backgroundColor;
+          info.el.style.borderColor = info.event.backgroundColor;
         }
       });
 
