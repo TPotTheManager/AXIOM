@@ -277,6 +277,8 @@
         if (resp.error !== undefined) {
           throw (resp);
         }
+        // Store the token
+        localStorage.setItem('googleToken', JSON.stringify(gapi.client.getToken()));
         document.getElementById('loginContainer').style.display = 'none';
         document.getElementById('calendar').style.display = 'block';
         initCalendar();
@@ -286,6 +288,45 @@
         tokenClient.requestAccessToken({prompt: 'consent'});
       } else {
         tokenClient.requestAccessToken({prompt: ''});
+      }
+    }
+
+    function handleSignoutClick() {
+      const token = gapi.client.getToken();
+      if (token !== null) {
+        google.accounts.oauth2.revoke(token.access_token);
+        gapi.client.setToken('');
+        localStorage.removeItem('googleToken');
+        document.getElementById('calendar').style.display = 'none';
+        document.getElementById('loginContainer').style.display = 'block';
+      }
+    }
+
+    // Check for existing token on page load
+    function checkExistingAuth() {
+      const storedToken = localStorage.getItem('googleToken');
+      if (storedToken) {
+        try {
+          const token = JSON.parse(storedToken);
+          gapi.client.setToken(token);
+          
+          // Verify token is still valid by making a test call
+          gapi.client.calendar.calendarList.list().then(
+            function(response) {
+              // Token is valid
+              document.getElementById('loginContainer').style.display = 'none';
+              document.getElementById('calendar').style.display = 'block';
+              initCalendar();
+            },
+            function(err) {
+              // Token expired, clear it
+              localStorage.removeItem('googleToken');
+              gapi.client.setToken('');
+            }
+          );
+        } catch (e) {
+          localStorage.removeItem('googleToken');
+        }
       }
     }
 
