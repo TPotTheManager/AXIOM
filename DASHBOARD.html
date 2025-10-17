@@ -96,6 +96,13 @@
       border-radius: 4px;
       font-size: 14px;
     }
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
     .button-group {
       display: flex;
       gap: 10px;
@@ -372,7 +379,8 @@
         },
         eventResize: function(info) {
           updateEventInCalendar(info.event);
-        }
+        },
+        
         // Display event with custom styling
         eventDidMount: function(info) {
           info.el.style.backgroundColor = info.event.backgroundColor;
@@ -394,6 +402,7 @@
         document.getElementById('eventTitle').value = '';
         document.getElementById('eventStart').value = formatDateForInput(data.start);
         document.getElementById('eventEnd').value = formatDateForInput(data.end);
+        document.getElementById('eventColor').value = '9'; // Default to Blueberry
         deleteBtn.style.display = 'none';
         currentEvent = null;
       } else {
@@ -401,6 +410,7 @@
         document.getElementById('eventTitle').value = data.title;
         document.getElementById('eventStart').value = formatDateForInput(data.start);
         document.getElementById('eventEnd').value = formatDateForInput(data.end);
+        document.getElementById('eventColor').value = data.extendedProps.colorId || '9';
         deleteBtn.style.display = 'block';
         currentEvent = data;
       }
@@ -423,25 +433,51 @@
       return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
 
+    function getColorFromId(colorId) {
+      const colorMap = {
+        '1': '#8D602C',
+        '2': '#7ae7bf',
+        '3': '#dbadff',
+        '4': '#ff887c',
+        '5': '#fbd75b',
+        '6': '#ffb878',
+        '7': '#46d6db',
+        '8': '#e1e1e1',
+        '9': '#5484ed',
+        '10': '#51b749',
+        '11': '#dc2127'
+      };
+      return colorMap[colorId] || '#5484ed';
+    }
+
     document.getElementById('eventForm').addEventListener('submit', function(e) {
       e.preventDefault();
       
       const title = document.getElementById('eventTitle').value;
       const start = document.getElementById('eventStart').value;
       const end = document.getElementById('eventEnd').value;
+      const colorId = document.getElementById('eventColor').value;
+      const backgroundColor = getColorFromId(colorId);
       
       if (currentEvent) {
         // Update existing event
         currentEvent.setProp('title', title);
         currentEvent.setStart(start);
         currentEvent.setEnd(end);
+        currentEvent.setProp('backgroundColor', backgroundColor);
+        currentEvent.setExtendedProp('colorId', colorId);
         updateEventInCalendar(currentEvent);
       } else {
         // Add new event
         const newEvent = calendar.addEvent({
           title: title,
           start: start,
-          end: end
+          end: end,
+          backgroundColor: backgroundColor,
+          borderColor: backgroundColor,
+          extendedProps: {
+            colorId: colorId
+          }
         });
         addEventToCalendar(newEvent);
       }
@@ -478,7 +514,12 @@
               id: event.id,
               title: event.summary,
               start: event.start.dateTime || event.start.date,
-              end: event.end.dateTime || event.end.date
+              end: event.end.dateTime || event.end.date,
+              backgroundColor: getColorFromId(event.colorId || '9'),
+              borderColor: getColorFromId(event.colorId || '9'),
+              extendedProps: {
+                colorId: event.colorId || '9'
+              }
             });
           });
         }
@@ -499,7 +540,8 @@
           'end': {
             'dateTime': event.end.toISOString(),
             'timeZone': 'America/Phoenix'
-          }
+          },
+          'colorId': event.extendedProps.colorId
         };
 
         const response = await gapi.client.calendar.events.insert({
@@ -527,7 +569,8 @@
           'end': {
             'dateTime': event.end.toISOString(),
             'timeZone': 'America/Phoenix'
-          }
+          },
+          'colorId': event.extendedProps.colorId
         };
 
         await gapi.client.calendar.events.update({
