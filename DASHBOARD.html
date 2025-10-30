@@ -498,12 +498,18 @@
     
     async function loadEvents() {
       try {
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        const sixMonthsAhead = new Date();
+        sixMonthsAhead.setMonth(sixMonthsAhead.getMonth() + 6);
+        
         const response = await gapi.client.calendar.events.list({
           'calendarId': CALENDAR_ID,
-          'timeMin': (new Date()).toISOString(),
+          'timeMin': sixMonthsAgo.toISOString(),
           'showDeleted': false,
           'singleEvents': true,
-          'maxResults': 250,
+          'maxResults': 2500,
           'orderBy': 'startTime'
         });
 
