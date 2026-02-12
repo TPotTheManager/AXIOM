@@ -235,7 +235,8 @@
   </div>
 
   <script>
-    // Google API Configuration
+    // --- KIOSK MODE AUTHENTICATION LOGIC ---
+
     const CLIENT_ID = '22963410601-aek29etcolf3nkkpifs2mncehj60ta7e.apps.googleusercontent.com';
     const API_KEY = 'AIzaSyDeyN9bNwa-_CCcHPcRksbg_i0Q4yBvjac';
     const CALENDAR_ID = 'c_8bb7f80d46484a64298e0c67b6ca7f1580bc73242162874c2b938b882597d270@group.calendar.google.com';
@@ -245,11 +246,11 @@
     let tokenClient;
     let gapiInited = false;
     let gisInited = false;
-    
     let calendar;
     let currentEvent = null;
+    let tokenRefreshTimer; 
 
-    // Initialize Google API
+    // 1. Load the Google Libraries
     function gapiLoaded() {
       gapi.load('client', initializeGapiClient);
     }
@@ -260,42 +261,103 @@
         discoveryDocs: [DISCOVERY_DOC],
       });
       gapiInited = true;
-      maybeEnableButtons();
+      attemptAutoStart(); // Try to start immediately once loaded
     }
 
     function gisLoaded() {
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: CLIENT_ID,
         scope: SCOPES,
-        callback: '', // defined later
+        callback: handleTokenResponse,
       });
       gisInited = true;
-      maybeEnableButtons();
+      attemptAutoStart(); // Try to start immediately once loaded
     }
 
-    function maybeEnableButtons() {
-      if (gapiInited && gisInited) {
-        document.getElementById('signInBtn').disabled = false;
-      }
-    }
+    // 2. The Brain: Decide whether to show Login Button or Auto-Load
+    function attemptAutoStart() {
+      // Only run if BOTH libraries are ready
+      if (!gapiInited || !gisInited) return;
 
-    function handleAuthClick() {
-      tokenClient.callback = async (resp) => {
-        if (resp.error !== undefined) {
-          throw (resp);
+      // Check if we have a stored token from a previous session
+      const storedToken = localStorage.getItem('googleToken');
+
+      if (storedToken) {
+        try {
+          const token = JSON.parse(storedToken);
+          gapi.client.setToken(token);
+          
+          // Test if the token is still good
+          gapi.client.calendar.calendarList.list().then(
+            function() {
+              // Token is valid! Start the refresh timer and show calendar.
+              console.log("Restored valid session. Starting dashboard...");
+              scheduleRefresh();
+              showCalendarUI();
+            },
+            function() {
+              // Token is dead. Try to refresh it silently (NO USER CLICK).
+              console.log("Session expired. Attempting silent heal...");
+              refreshAccessTokenSilent();
+            }
+          );
+        } catch (e) {
+          // Data corrupt. Use silent refresh to fix.
+          refreshAccessTokenSilent();
         }
-        // Store the token
-        localStorage.setItem('googleToken', JSON.stringify(gapi.client.getToken()));
-        document.getElementById('loginContainer').style.display = 'none';
-        document.getElementById('calendar').style.display = 'block';
-        initCalendar();
-      };
-
-      if (gapi.client.getToken() === null) {
-        tokenClient.requestAccessToken({prompt: 'consent'});
       } else {
-        tokenClient.requestAccessToken({prompt: ''});
+        // No token found (first time ever run). Try silent login anyway?
+        // If that fails, show the button.
+        refreshAccessTokenSilent();
       }
+    }
+
+    // 3. Handle the Token (from button click OR silent refresh)
+    async function handleTokenResponse(resp) {
+      if (resp.error !== undefined) {
+        // Silent refresh failed (User actually needs to log in manually)
+        console.warn("Silent auth failed, user must click button:", resp);
+        document.getElementById('signInBtn').disabled = false;
+        document.getElementById('loginContainer').style.display = 'block';
+        document.getElementById('calendar').style.display = 'none';
+        return; 
+      }
+      
+      // Success! Save token and start the timer
+      const token = gapi.client.getToken();
+      localStorage.setItem('googleToken', JSON.stringify(token));
+      scheduleRefresh();
+      showCalendarUI();
+    }
+
+    function scheduleRefresh() {
+      if (tokenRefreshTimer) clearTimeout(tokenRefreshTimer);
+      // Refresh every 50 minutes (3000000 ms)
+      console.log('Token secured. Next auto-refresh in 50 minutes.');
+      tokenRefreshTimer = setTimeout(refreshAccessTokenSilent, 50 * 60 * 1000);
+    }
+
+    function refreshAccessTokenSilent() {
+      // prompt: '' asks Google to issue a token WITHOUT a popup
+      // If the browser has cookies, this succeeds.
+      console.log("Refreshing token in background...");
+      tokenClient.requestAccessToken({prompt: ''});
+    }
+
+    function showCalendarUI() {
+      document.getElementById('loginContainer').style.display = 'none';
+      document.getElementById('calendar').style.display = 'block';
+      if (!calendar) {
+          initCalendar();
+      } else {
+          loadEvents(); 
+      }
+    }
+
+    // 4. Manual Interactions
+    function handleAuthClick() {
+      // If manual click, force the popup just in case
+      tokenClient.requestAccessToken({prompt: 'consent'});
     }
 
     function handleSignoutClick() {
@@ -304,50 +366,15 @@
         google.accounts.oauth2.revoke(token.access_token);
         gapi.client.setToken('');
         localStorage.removeItem('googleToken');
+        if (tokenRefreshTimer) clearTimeout(tokenRefreshTimer);
         document.getElementById('calendar').style.display = 'none';
         document.getElementById('loginContainer').style.display = 'block';
       }
     }
 
-    // Check for existing token on page load
-    function checkExistingAuth() {
-      const storedToken = localStorage.getItem('googleToken');
-      if (storedToken) {
-        try {
-          const token = JSON.parse(storedToken);
-          gapi.client.setToken(token);
-          
-          // Verify token is still valid by making a test call
-          gapi.client.calendar.calendarList.list().then(
-            function(response) {
-              // Token is valid
-              document.getElementById('loginContainer').style.display = 'none';
-              document.getElementById('calendar').style.display = 'block';
-              initCalendar();
-            },
-            function(err) {
-              // Token expired, clear it
-              localStorage.removeItem('googleToken');
-              gapi.client.setToken('');
-            }
-          );
-        } catch (e) {
-          localStorage.removeItem('googleToken');
-        }
-      }
-    }
-
-    // Load Google API on page load
-    window.onload = function() {
-      gapiLoaded();
-      gisLoaded();
-      // Check for existing auth after API loads
-      setTimeout(checkExistingAuth, 1000);
-    };
-
+    // 5. Standard Calendar Logic (Unchanged)
     function initCalendar() {
       const calendarEl = document.getElementById('calendar');
-
       calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         headerToolbar: {
@@ -358,40 +385,35 @@
         selectable: true,
         editable: true,
         events: [],
-        
-        // When user clicks on calendar to add new event
         select: function(info) {
-          openModal('add', {
-            start: info.start,
-            end: info.end
-          });
+          openModal('add', { start: info.start, end: info.end });
           calendar.unselect();
         },
-        
-        // When user clicks on existing event
-        eventClick: function(info) {
-          openModal('edit', info.event);
-        },
-        
-        // When user drags/resizes event
-        eventDrop: function(info) {
-          updateEventInCalendar(info.event);
-        },
-        eventResize: function(info) {
-          updateEventInCalendar(info.event);
-        },
-        
-        // Display event with custom styling
+        eventClick: function(info) { openModal('edit', info.event); },
+        eventDrop: function(info) { updateEventInCalendar(info.event); },
+        eventResize: function(info) { updateEventInCalendar(info.event); },
         eventDidMount: function(info) {
           info.el.style.backgroundColor = info.event.backgroundColor;
           info.el.style.borderColor = info.event.backgroundColor;
         }
       });
-
       calendar.render();
       loadEvents();
     }
 
+    // ... [Keep your existing openModal, closeModal, formatDateForInput, etc.] ...
+    
+    // ... [Keep your existing loadEvents, addEventToCalendar, etc.] ...
+
+    // Just ensure window.onload calls the loaders
+    window.onload = function() {
+      gapiLoaded();
+      gisLoaded();
+    };
+    
+    // --- PASTE REST OF YOUR HELPER FUNCTIONS BELOW HERE (openModal, etc) ---
+    // (You don't need to change the logic for saving/deleting events)
+    
     function openModal(mode, data) {
       const modal = document.getElementById('eventModal');
       const modalTitle = document.getElementById('modalTitle');
@@ -402,7 +424,7 @@
         document.getElementById('eventTitle').value = '';
         document.getElementById('eventStart').value = formatDateForInput(data.start);
         document.getElementById('eventEnd').value = formatDateForInput(data.end);
-        document.getElementById('eventColor').value = '9'; // Default to Blueberry
+        document.getElementById('eventColor').value = '9'; 
         deleteBtn.style.display = 'none';
         currentEvent = null;
       } else {
@@ -435,17 +457,9 @@
 
     function getColorFromId(colorId) {
       const colorMap = {
-        '1': '#8D602C',
-        '2': '#7ae7bf',
-        '3': '#dbadff',
-        '4': '#ff887c',
-        '5': '#fbd75b',
-        '6': '#ffb878',
-        '7': '#46d6db',
-        '8': '#e1e1e1',
-        '9': '#5484ed',
-        '10': '#51b749',
-        '11': '#dc2127'
+        '1': '#8D602C', '2': '#7ae7bf', '3': '#dbadff', '4': '#ff887c',
+        '5': '#fbd75b', '6': '#ffb878', '7': '#46d6db', '8': '#e1e1e1',
+        '9': '#5484ed', '10': '#51b749', '11': '#dc2127'
       };
       return colorMap[colorId] || '#5484ed';
     }
@@ -459,20 +473,25 @@
       const colorId = document.getElementById('eventColor').value;
       const backgroundColor = getColorFromId(colorId);
       
+      // Need to convert input strings back to Date objects for FullCalendar
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      
       if (currentEvent) {
-        // Update existing event
         currentEvent.setProp('title', title);
-        currentEvent.setStart(start);
-        currentEvent.setEnd(end);
+        currentEvent.setStart(startDate);
+        currentEvent.setEnd(endDate);
         currentEvent.setProp('backgroundColor', backgroundColor);
         currentEvent.setExtendedProp('colorId', colorId);
         updateEventInCalendar(currentEvent);
       } else {
-        // Add new event
+        // For new events, we create a plain object first or let FullCalendar handle it
+        // But your addEventToCalendar expects a FullCalendar event object wrapper usually
+        // Let's rely on calendar.addEvent returning the object
         const newEvent = calendar.addEvent({
           title: title,
-          start: start,
-          end: end,
+          start: startDate,
+          end: endDate,
           backgroundColor: backgroundColor,
           borderColor: backgroundColor,
           extendedProps: {
@@ -493,9 +512,8 @@
       }
     }
 
-    // Note: These functions use placeholder logic since we can't actually connect to Google Calendar
-    // from a standalone HTML file. You'll need to implement the Google Calendar API integration.
-    
+    // --- GOOGLE CALENDAR API CALLS ---
+
     async function loadEvents() {
       try {
         const sixMonthsAgo = new Date();
@@ -514,6 +532,10 @@
         });
 
         const events = response.result.items;
+        
+        // Clear existing events first to avoid duplicates on refresh
+        calendar.removeAllEvents();
+
         if (events && events.length > 0) {
           events.forEach(event => {
             calendar.addEvent({
@@ -531,7 +553,10 @@
         }
       } catch (err) {
         console.error('Error loading events:', err);
-        alert('Error loading events from Google Calendar');
+        // If 401 error, we might need to refresh token
+        if (err.result && err.result.error && err.result.error.code === 401) {
+            refreshAccessTokenSilent();
+        }
       }
     }
 
@@ -555,7 +580,6 @@
           'resource': googleEvent
         });
 
-        // Update the event ID so we can modify/delete it later
         event.setProp('id', response.result.id);
         console.log('Event created:', response.result.htmlLink);
       } catch (err) {
