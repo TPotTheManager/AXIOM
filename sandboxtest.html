@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  
+  <!-- FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+  
+  <!-- Google API -->
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 10px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+    }
+
+    /* --- TAB NAV (mobile only) --- */
+    .tab-nav {
+      display: none;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 4px;
+      border: none;
+      border-radius: 6px;
+      background: #ddd;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #555;
+    }
+    .tab-btn.active {
+      background: #4285f4;
+      color: white;
+    }
+
+    /* --- DESKTOP LAYOUT --- */
+    .container {
+      display: flex;
+      gap: 20px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .calendar-container {
+      flex: 1;
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .embed {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    iframe {
+      display: block;
+      border: none;
+    }
+    #calendar { height: 750px; }
+
+    /* --- MOBILE LAYOUT --- */
+    @media (max-width: 768px) {
+      body { padding: 8px; }
+
+      .tab-nav { display: flex; }
+
+      .container {
+        flex-direction: column;
+        gap: 0;
+      }
+
+      /* Hide all panels by default on mobile */
+      .left-column,
+      .calendar-container {
+        display: none;
+      }
+
+      /* Show active panel */
+      .left-column.active,
+      .calendar-container.active {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .calendar-container.active {
+        display: block;
+      }
+
+      /* Shrink sheet heights on mobile */
+      .embed iframe {
+        height: 320px !important;
+      }
+
+      /* Shrink calendar height on mobile */
+      #calendar { height: 520px; }
+
+      /* Smaller modal on mobile */
+      .modal-content {
+        margin: 5% auto !important;
+        width: 95% !important;
+        padding: 20px !important;
+      }
+
+      /* Stack form inputs nicely */
+      .form-group input,
+      .form-group select {
+        font-size: 16px !important; /* Prevents iOS zoom on focus */
+      }
+    }
+
+    /* --- MODAL --- */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      overflow-y: auto;
+    }
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 30px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .modal-content h2 { margin-top: 0; color: #333; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #555;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 25px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .btn-primary  { background-color: #4CAF50; color: white; }
+    .btn-primary:hover  { background-color: #45a049; }
+    .btn-secondary { background-color: #999; color: white; }
+    .btn-secondary:hover { background-color: #777; }
+    .btn-danger   { background-color: #f44336; color: white; }
+    .btn-danger:hover   { background-color: #da190b; }
+
+    .login-container {
+      text-align: center;
+      padding: 20px;
+      background: #f0f0f0;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    #signInBtn {
+      padding: 12px 24px;
+      background: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    #signInBtn:hover { background: #357ae8; }
+  </style>
+</head>
+<body>
+
+  <!-- Tab navigation (visible on mobile only) -->
+  <nav class="tab-nav">
+    <button class="tab-btn" onclick="showTab('sheets')">📊 Sheets</button>
+    <button class="tab-btn active" onclick="showTab('calendar')">📅 Calendar</button>
+  </nav>
+
+  <div class="container">
+    <!-- Left column: Sheets -->
+    <div class="left-column" id="sheetsPanel">
+      <div class="embed">
+        <iframe 
+          src="https://docs.google.com/spreadsheets/d/1N2Fg4Uwky_TaXb-XwHFOoPiQgf20hJDWQqB2L_dIsko/edit?rm=minimal"
+          width="100%" height="400">
+        </iframe>
+      </div>
+      <div class="embed">
+        <iframe 
+          src="https://docs.google.com/spreadsheets/d/1SfT40Ezl2C1YZHyFHp277YtQ3D22zomKO-qA1l9IFh0/edit?rm=minimal"
+          width="100%" height="400">
+        </iframe>
+      </div>
+    </div>
+
+    <!-- Right column: Calendar -->
+    <div class="calendar-container active" id="calendarPanel">
+      <div class="login-container" id="loginContainer">
+        <p>Please sign in to access your calendar:</p>
+        <button id="signInBtn" onclick="handleAuthClick()">Sign in with Google</button>
+      </div>
+      <div id="calendar" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Event Modal -->
+  <div id="eventModal" class="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Add Event</h2>
+      <form id="eventForm">
+        <div class="form-group">
+          <label for="eventTitle">Event Title:</label>
+          <input type="text" id="eventTitle" required>
+        </div>
+        <div class="form-group">
+          <label for="eventStart">Start Date & Time:</label>
+          <input type="datetime-local" id="eventStart" required>
+        </div>
+        <div class="form-group">
+          <label for="eventEnd">End Date & Time:</label>
+          <input type="datetime-local" id="eventEnd" required>
+        </div>
+        <div class="form-group">
+          <label for="eventColor">Color:</label>
+          <select id="eventColor">
+            <option value="1">AXIOM</option>
+            <option value="2">JIM</option>
+            <option value="3">TAYLOR</option>
+            <option value="4">FELIPE</option>
+            <option value="5">SALVADOR</option>
+            <option value="6">3RD PARTY SUB</option>
+            <option value="7">CITY</option>
+            <option value="8">Graphite</option>
+            <option value="9" selected>Blueberry</option>
+            <option value="10">Basil</option>
+            <option value="11">Tomato</option>
+          </select>
+        </div>
+        <div class="button-group">
+          <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+          <button type="button" class="btn-danger" id="deleteBtn" style="display:none;" onclick="deleteEvent()">Delete</button>
+          <button type="submit" class="btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // --- TAB SWITCHING (mobile) ---
+    function showTab(tab) {
+      const sheetsPanel = document.getElementById('sheetsPanel');
+      const calendarPanel = document.getElementById('calendarPanel');
+      const btns = document.querySelectorAll('.tab-btn');
+
+      if (tab === 'sheets') {
+        sheetsPanel.classList.add('active');
+        calendarPanel.classList.remove('active');
+        btns[0].classList.add('active');
+        btns[1].classList.remove('active');
+      } else {
+        calendarPanel.classList.add('active');
+        sheetsPanel.classList.remove('active');
+        btns[1].classList.add('active');
+        btns[0].classList.remove('active');
+      }
+    }
+
+    // --- GOOGLE API ---
+    const CLIENT_ID = '22963410601-aek29etcolf3nkkpifs2mncehj60ta7e.apps.googleusercontent.com';
+    const API_KEY = 'AIzaSyDeyN9bNwa-_CCcHPcRksbg_i0Q4yBvjac';
+    const CALENDAR_ID = 'c_8bb7f80d46484a64298e0c67b6ca7f1580bc73242162874c2b938b882597d270@group.calendar.google.com';
+    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
+    const SCOPES = 'https://www.googleapis.com/auth/calendar';
+
+    let tokenClient, gapiInited = false, gisInited = false;
+    let calendar, currentEvent = null, tokenRefreshTimer;
+
+    function gapiLoaded() { gapi.load('client', initializeGapiClient); }
+
+    async function initializeGapiClient() {
+      await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] });
+      gapiInited = true;
+      attemptAutoStart();
+    }
+
+    function gisLoaded() {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: handleTokenResponse,
+      });
+      gisInited = true;
+      attemptAutoStart();
+    }
+
+    function attemptAutoStart() {
+      if (!gapiInited || !gisInited) return;
+      const storedToken = localStorage.getItem('googleToken');
+      if (storedToken) {
+        try {
+          gapi.client.setToken(JSON.parse(storedToken));
+          gapi.client.calendar.calendarList.list().then(
+            () => { scheduleRefresh(); showCalendarUI(); },
+            () => { refreshAccessTokenSilent(); }
+          );
+        } catch(e) { refreshAccessTokenSilent(); }
+      } else {
+        refreshAccessTokenSilent();
+      }
+    }
+
+    async function handleTokenResponse(resp) {
+      if (resp.error !== undefined) {
+        document.getElementById('signInBtn').disabled = false;
+        document.getElementById('loginContainer').style.display = 'block';
+        document.getElementById('calendar').style.display = 'none';
+        return;
+      }
+      localStorage.setItem('googleToken', JSON.stringify(gapi.client.getToken()));
+      scheduleRefresh();
+      showCalendarUI();
+    }
+
+    function scheduleRefresh() {
+      if (tokenRefreshTimer) clearTimeout(tokenRefreshTimer);
+      tokenRefreshTimer = setTimeout(refreshAccessTokenSilent, 50 * 60 * 1000);
+    }
+
+    function refreshAccessTokenSilent() {
+      tokenClient.requestAccessToken({ prompt: '' });
+    }
+
+    function showCalendarUI() {
+      document.getElementById('loginContainer').style.display = 'none';
+      document.getElementById('calendar').style.display = 'block';
+      if (!calendar) initCalendar();
+      else loadEvents();
+    }
+
+    function handleAuthClick() {
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+
+    function initCalendar() {
+      const calendarEl = document.getElementById('calendar');
+      const isMobile = window.innerWidth <= 768;
+
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: isMobile ? 'listWeek' : 'dayGridMonth',
+        headerToolbar: isMobile
+          ? { left: 'prev,next', center: 'title', right: 'listWeek,dayGridMonth' }
+          : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
+        selectable: true,
+        editable: true,
+        events: [],
+        select: info => { openModal('add', { start: info.start, end: info.end }); calendar.unselect(); },
+        eventClick: info => openModal('edit', info.event),
+        eventDrop: info => updateEventInCalendar(info.event),
+        eventResize: info => updateEventInCalendar(info.event),
+        eventDidMount: info => {
+          info.el.style.backgroundColor = info.event.backgroundColor;
+          info.el.style.borderColor = info.event.backgroundColor;
+        }
+      });
+      calendar.render();
+      loadEvents();
+    }
+
+    function openModal(mode, data) {
+      const modal = document.getElementById('eventModal');
+      const deleteBtn = document.getElementById('deleteBtn');
+      document.getElementById('modalTitle').textContent = mode === 'add' ? 'Add Event' : 'Edit Event';
+      document.getElementById('eventTitle').value = mode === 'add' ? '' : data.title;
+      document.getElementById('eventStart').value = formatDateForInput(data.start);
+      document.getElementById('eventEnd').value = formatDateForInput(mode === 'add' ? data.end : data.end);
+      document.getElementById('eventColor').value = mode === 'add' ? '9' : (data.extendedProps.colorId || '9');
+      deleteBtn.style.display = mode === 'add' ? 'none' : 'block';
+      currentEvent = mode === 'add' ? null : data;
+      modal.style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('eventModal').style.display = 'none';
+      currentEvent = null;
+    }
+
+    function formatDateForInput(date) {
+      const d = new Date(date);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+
+    function getColorFromId(id) {
+      return { '1':'#8D602C','2':'#7ae7bf','3':'#dbadff','4':'#ff887c','5':'#fbd75b',
+               '6':'#ffb878','7':'#46d6db','8':'#e1e1e1','9':'#5484ed','10':'#51b749','11':'#dc2127' }[id] || '#5484ed';
+    }
+
+    document.getElementById('eventForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const title = document.getElementById('eventTitle').value;
+      const start = new Date(document.getElementById('eventStart').value);
+      const end = new Date(document.getElementById('eventEnd').value);
+      const colorId = document.getElementById('eventColor').value;
+      const bg = getColorFromId(colorId);
+
+      if (currentEvent) {
+        currentEvent.setProp('title', title);
+        currentEvent.setStart(start);
+        currentEvent.setEnd(end);
+        currentEvent.setProp('backgroundColor', bg);
+        currentEvent.setExtendedProp('colorId', colorId);
+        updateEventInCalendar(currentEvent);
+      } else {
+        const ev = calendar.addEvent({ title, start, end, backgroundColor: bg, borderColor: bg, extendedProps: { colorId } });
+        addEventToCalendar(ev);
+      }
+      closeModal();
+    });
+
+    function deleteEvent() {
+      if (currentEvent && confirm('Are you sure you want to delete this event?')) {
+        deleteEventFromCalendar(currentEvent);
+        currentEvent.remove();
+        closeModal();
+      }
+    }
+
+    async function loadEvents() {
+      try {
+        const past = new Date(); past.setMonth(past.getMonth() - 6);
+        const future = new Date(); future.setMonth(future.getMonth() + 6);
+        const res = await gapi.client.calendar.events.list({
+          calendarId: CALENDAR_ID,
+          timeMin: past.toISOString(),
+          timeMax: future.toISOString(),
+          showDeleted: false, singleEvents: true, maxResults: 2500, orderBy: 'startTime'
+        });
+        calendar.removeAllEvents();
+        (res.result.items || []).forEach(ev => {
+          calendar.addEvent({
+            id: ev.id, title: ev.summary,
+            start: ev.start.dateTime || ev.start.date,
+            end: ev.end.dateTime || ev.end.date,
+            backgroundColor: getColorFromId(ev.colorId || '9'),
+            borderColor: getColorFromId(ev.colorId || '9'),
+            extendedProps: { colorId: ev.colorId || '9' }
+          });
+        });
+      } catch(err) {
+        if (err.result?.error?.code === 401) refreshAccessTokenSilent();
+      }
+    }
+
+    async function addEventToCalendar(ev) {
+      try {
+        const res = await gapi.client.calendar.events.insert({
+          calendarId: CALENDAR_ID,
+          resource: { summary: ev.title, colorId: ev.extendedProps.colorId,
+            start: { dateTime: ev.start.toISOString(), timeZone: 'America/Phoenix' },
+            end: { dateTime: ev.end.toISOString(), timeZone: 'America/Phoenix' } }
+        });
+        ev.setProp('id', res.result.id);
+      } catch(err) { alert('Error adding event'); }
+    }
+
+    async function updateEventInCalendar(ev) {
+      try {
+        await gapi.client.calendar.events.update({
+          calendarId: CALENDAR_ID, eventId: ev.id,
+          resource: { summary: ev.title, colorId: ev.extendedProps.colorId,
+            start: { dateTime: ev.start.toISOString(), timeZone: 'America/Phoenix' },
+            end: { dateTime: ev.end.toISOString(), timeZone: 'America/Phoenix' } }
+        });
+      } catch(err) { alert('Error updating event'); }
+    }
+
+    async function deleteEventFromCalendar(ev) {
+      try {
+        await gapi.client.calendar.events.delete({ calendarId: CALENDAR_ID, eventId: ev.id });
+      } catch(err) { alert('Error deleting event'); }
+    }
+
+    window.onclick = e => { if (e.target === document.getElementById('eventModal')) closeModal(); };
+    window.onload = () => { gapiLoaded(); gisLoaded(); };
+  </script>
+</body>
+</html>
