@@ -134,6 +134,10 @@
         margin-bottom: 4px !important;
       }
 
+      #calendar { 
+        height: calc(100vh - 55px);
+      }
+
       /* Smaller modal on mobile */
       .modal-content {
         margin: 5% auto !important;
@@ -407,7 +411,6 @@
         headerToolbar: isMobile
           ? { left: 'prev,next', center: 'title', right: 'listWeek,dayGridMonth' }
           : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
-        height: isMobile ? window.innerHeight - 55 : 750,
         selectable: true,
         editable: true,
         events: [],
